@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "serverless-s3"
+version = "0.1.0"
+description = "Check read/write performance between runtimes."
+authors = ["krymtkts <takatoshi.kuriyama@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aws-lambda-context = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+flake8 = "^3.7.9"
+boto3 = "^1.12.26"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
