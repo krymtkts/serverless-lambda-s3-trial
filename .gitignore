@@ -1,0 +1,6 @@
+# Distribution / packaging
+.vscode
+node_modules
+
+# Serverless directories
+.serverless
