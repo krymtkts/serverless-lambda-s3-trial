@@ -1,0 +1,95 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: go-s3
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+frameworkVersion: ">=1.28.0 <2.0.0"
+
+plugins:
+  - serverless-step-functions
+
+provider:
+  name: aws
+  runtime: go1.x
+
+  # you can overwrite defaults here
+  #  stage: dev
+  region: ap-northeast-1
+  memorySize: 2048
+  timeout: 900
+  iamManagedPolicies:
+    - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  # you can add statements to the Lambda function's IAM Role here
+  #  iamRoleStatements:
+  #    - Effect: "Allow"
+  #      Action:
+  #        - "s3:ListBucket"
+  #      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+  #    - Effect: "Allow"
+  #      Action:
+  #        - "s3:PutObject"
+  #      Resource:
+  #        Fn::Join:
+  #          - ""
+  #          - - "arn:aws:s3:::"
+  #            - "Ref" : "ServerlessDeploymentBucket"
+  #            - "/*"
+
+  # you can define service wide environment variables here
+  environment:
+    InputBucketName: serverless-s3-input-bucket
+    OutputBucketName: serverless-s3-output-bucket
+
+package:
+  exclude:
+    - ./**
+  include:
+    - ./bin/**
+
+functions:
+  entry:
+    handler: bin/entry
+    timeout: 900
+  readWrite:
+    handler: bin/read-write
+    timeout: 900
+
+stepFunctions:
+  stateMachines:
+    GoS3Poc:
+      definition:
+        Comment: "Sample for read from / write to S3."
+        StartAt: Entrypoint
+        States:
+          Entrypoint:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [entry, Arn]
+            Next: ReadWriteTask
+          ReadWriteTask:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [readWrite, Arn]
+            End: true
+  # activities:
+  #   - myTask
+  #   - yourTask
+  validate: true # enable pre-deployment definition validation (disabled by default)
